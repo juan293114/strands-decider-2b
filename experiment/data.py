@@ -11,7 +11,7 @@ def read_split(particion: str) -> pd.DataFrame:
     """Devuelve 'train' o 'test' con columnas: id, texto, intencion."""
     ruta = CARPETA_DATOS / f"{particion}.csv"
     if not ruta.exists():
-        raise SystemExit(f"No existe {ruta}. Ejecuta primero: python 1_descargar_datos.py")
+        raise SystemExit(f"No existe {ruta}. Ejecuta primero: python 1_download_data.py")
     df = pd.read_csv(ruta).rename(columns={"text": "texto", "category": "intencion"})
     df.insert(0, "id", range(len(df)))
     return df
@@ -38,17 +38,17 @@ def build_options(condicion: str, intenciones: list[str],
                        barajar_con: random.Random | None = None) -> dict[str, str | None]:
     """Arma el diccionario `criteria` de la pregunta choice.
 
-    - "nombres":       {"card arrival": None, ...}
-    - "descripciones": {"card arrival": "an ordered card has not arrived yet", ...}
+    - "names":        {"card arrival": None, ...}
+    - "descriptions": {"card arrival": "an ordered card has not arrived yet", ...}
     Si se pasa `barajar_con`, el orden de las opciones se baraja.
     """
     orden = list(intenciones)
     if barajar_con is not None:
         barajar_con.shuffle(orden)
 
-    if condicion == "nombres":
+    if condicion == "names":
         return {readable_name(i): None for i in orden}
-    if condicion == "descripciones":
+    if condicion == "descriptions":
         descripciones = json.loads(ARCHIVO_DESCRIPCIONES.read_text())
         return {readable_name(i): descripciones[i] for i in orden}
     raise ValueError(f"Condición desconocida: {condicion}")

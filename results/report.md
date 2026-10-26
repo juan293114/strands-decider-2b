@@ -9,11 +9,11 @@ La latencia es la que reporta el servidor del decider, sin red ni LiteLLM.
 | condicion                  |   accuracy |   macro_f1 |    top3 |    top5 |     ECE |   latencia_p50_ms |   latencia_p95_ms |
 |:---------------------------|-----------:|-----------:|--------:|--------:|--------:|------------------:|------------------:|
 | TF-IDF + SVM (supervisado) |      0.916 |      0.915 | nan     | nan     | nan     |           nan     |           nan     |
-| Decider: descripciones     |      0.801 |      0.798 |   0.953 |   0.974 |   0.205 |           211.925 |           214.856 |
-| Decider: nombres           |      0.843 |      0.839 |   0.962 |   0.984 |   0.034 |            83.140 |            85.969 |
-| Decider: nombres_barajado  |      0.842 |      0.840 |   0.964 |   0.987 |   0.041 |            84.020 |            86.877 |
+| Decider: descriptions      |      0.801 |      0.798 |   0.953 |   0.974 |   0.205 |           211.925 |           214.856 |
+| Decider: names             |      0.843 |      0.839 |   0.962 |   0.984 |   0.034 |            83.140 |            85.969 |
+| Decider: names_shuffled    |      0.842 |      0.840 |   0.964 |   0.987 |   0.041 |            84.020 |            86.877 |
 
-## Condición: descripciones
+## Condición: descriptions
 
 Tokens de entrada: mediana 1447, máximo 1493.
 
@@ -61,7 +61,7 @@ Tokens de entrada: mediana 1447, máximo 1493.
 | direct_debit_payment_not_recognised     | card_payment_not_recognised    |       3 |
 | why_verify_identity                     | unable_to_verify_identity      |       3 |
 
-## Condición: nombres
+## Condición: names
 
 Tokens de entrada: mediana 625, máximo 671.
 
@@ -109,7 +109,7 @@ Tokens de entrada: mediana 625, máximo 671.
 | supported_cards_and_currencies          | fiat_currency_support          |       2 |
 | topping_up_by_card                      | pending_top_up                 |       2 |
 
-## Condición: nombres_barajado
+## Condición: names_shuffled
 
 Tokens de entrada: mediana 625, máximo 671.
 

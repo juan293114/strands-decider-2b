@@ -4,9 +4,9 @@ from pathlib import Path
 
 # ---- Rutas -----------------------------------------------------------------------------
 RAIZ = Path(__file__).resolve().parent.parent
-CARPETA_DATOS = RAIZ / "datos"
-CARPETA_RESULTADOS = RAIZ / "resultados"
-ARCHIVO_DESCRIPCIONES = CARPETA_DATOS / "descripciones_intenciones.json"
+CARPETA_DATOS = RAIZ / "data"
+CARPETA_RESULTADOS = RAIZ / "results"
+ARCHIVO_DESCRIPCIONES = CARPETA_DATOS / "intent_descriptions.json"
 ARCHIVO_ENV = RAIZ / ".env"
 
 # ---- Datos -----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ INSTRUCCION = (
     "This is a message from a customer of a digital bank. "
     "Which customer-support intent does the message express?"
 )
-CONDICIONES = ("nombres", "descripciones")
+CONDICIONES = ("names", "descriptions")
 
 # ---- Límites del servidor ----------------------------------------------------------------
 # La ventana del modelo es de ~3072 tokens. Por encima de este valor avisamos,

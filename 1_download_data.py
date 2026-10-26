@@ -1,12 +1,12 @@
-"""Paso 1: descarga BANKING77 (PolyAI, licencia CC BY 4.0) en la carpeta datos/.
+"""Paso 1: descarga BANKING77 (PolyAI, licencia CC BY 4.0) en la carpeta data/.
 
-    python 1_descargar_datos.py
+    python 1_download_data.py
 """
 import urllib.request
 
 import pandas as pd
 
-from experimento.config import CARPETA_DATOS, URL_BANKING77
+from experiment.config import CARPETA_DATOS, URL_BANKING77
 
 for particion in ("train", "test"):
     destino = CARPETA_DATOS / f"{particion}.csv"

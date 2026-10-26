@@ -1,12 +1,12 @@
-"""Paso 3: calcula las métricas y escribe resultados/reporte.md.
+"""Paso 3: calcula las métricas y escribe results/report.md.
 
-    python 3_analizar_resultados.py
+    python 3_analyze_results.py
 """
 import pandas as pd
 
-from experimento import metricas
-from experimento.config import CARPETA_RESULTADOS
-from experimento.datos import read_split
+from experiment import metrics
+from experiment.config import CARPETA_RESULTADOS
+from experiment.data import read_split
 
 
 def markdown_table(df: pd.DataFrame) -> str:
@@ -17,17 +17,17 @@ def main() -> None:
     corridas = {f.stem: pd.read_json(f, lines=True)
                 for f in sorted(CARPETA_RESULTADOS.glob("*.jsonl"))}
     if not corridas:
-        raise SystemExit("No hay resultados. Ejecuta primero: python 2_ejecutar_experimento.py")
+        raise SystemExit("No hay resultados. Ejecuta primero: python 2_run_experiment.py")
 
     # Comparamos solo los ejemplos presentes en todas las condiciones.
     comunes = set.intersection(*(set(df.id) for df in corridas.values()))
     corridas = {k: df[df.id.isin(comunes)] for k, df in corridas.items()}
 
     test = read_split("test")
-    referencia = metricas.supervised_baseline(read_split("train"),
+    referencia = metrics.supervised_baseline(read_split("train"),
                                                  test[test.id.isin(comunes)])
     filas = [{"condicion": "TF-IDF + SVM (supervisado)", **referencia}]
-    filas += [{"condicion": f"Decider: {k}", **metricas.summarize(df)} for k, df in corridas.items()]
+    filas += [{"condicion": f"Decider: {k}", **metrics.summarize(df)} for k, df in corridas.items()]
     resumen = pd.DataFrame(filas)
 
     modelos = sorted({m for df in corridas.values() for m in df.modelo.unique()})
@@ -42,12 +42,12 @@ def main() -> None:
             f"## Condición: {nombre}", "",
             f"Tokens de entrada: mediana {df.tokens_entrada.median():.0f}, "
             f"máximo {df.tokens_entrada.max()}.", "",
-            "### Exactitud según umbral de probabilidad", "", markdown_table(metricas.threshold_table(df)), "",
-            "### Diez intenciones con peor F1", "", markdown_table(metricas.worst_classes(df)), "",
-            "### Confusiones más frecuentes", "", markdown_table(metricas.top_confusions(df)), "",
+            "### Exactitud según umbral de probabilidad", "", markdown_table(metrics.threshold_table(df)), "",
+            "### Diez intenciones con peor F1", "", markdown_table(metrics.worst_classes(df)), "",
+            "### Confusiones más frecuentes", "", markdown_table(metrics.top_confusions(df)), "",
         ]
 
-    reporte = CARPETA_RESULTADOS / "reporte.md"
+    reporte = CARPETA_RESULTADOS / "report.md"
     reporte.write_text("\n".join(lineas))
     print(markdown_table(resumen))
     print(f"\nReporte completo en {reporte}")

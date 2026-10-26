@@ -3,7 +3,7 @@
     pip install openai pydantic
     export LITELLM_BASE_URL=http://loadbalancer-litellm-ext-1322139303.us-east-1.elb.amazonaws.com
     export LITELLM_API_KEY=<llave virtual>
-    python -m experimento.cliente_decider    (desde la carpeta strands-decider-2b)
+    python -m experiment.decider_client    (desde la carpeta strands-decider-2b)
 """
 import json
 import os

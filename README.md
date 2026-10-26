@@ -22,7 +22,7 @@ Lo que muestran:
 - **Añadir descripciones empeora todo.** Baja 4 puntos de accuracy, la calibración se degrada y la latencia se multiplica por 2,5.
 - **Los errores se concentran en intenciones casi sinónimas**, como `card_delivery_estimate` frente a `card_arrival` u `order_physical_card` frente a `get_physical_card`.
 
-El detalle por condición está en [resultados/reporte.md](resultados/reporte.md).
+El detalle por condición está en [results/report.md](results/report.md).
 
 ## Cómo funciona
 
@@ -41,23 +41,23 @@ Strands Decider no genera texto: recibe un texto (`state`) y una pregunta con op
 }
 ```
 
-En la condición `descripciones`, cada opción lleva una frase corta en lugar de `null`. Están en [datos/descripciones_intenciones.json](datos/descripciones_intenciones.json).
+En la condición `descriptions`, cada opción lleva una frase corta en lugar de `null`. Están en [data/intent_descriptions.json](data/intent_descriptions.json).
 
 ## Estructura
 
 ```
 strands-decider-2b/
-├── 1_descargar_datos.py        # Paso 1: descarga BANKING77
-├── 2_ejecutar_experimento.py   # Paso 2: consulta al decider y guarda respuestas
-├── 3_analizar_resultados.py    # Paso 3: métricas y reporte
-├── experimento/
+├── 1_download_data.py          # Paso 1: descarga BANKING77
+├── 2_run_experiment.py         # Paso 2: consulta al decider y guarda respuestas
+├── 3_analyze_results.py        # Paso 3: métricas y reporte
+├── experiment/
 │   ├── config.py               # rutas, instrucción y lectura de .env
-│   ├── datos.py                # lectura de BANKING77 y armado de opciones
-│   ├── cliente_decider.py      # cliente de LiteLLM (pydantic + SDK de OpenAI)
-│   └── metricas.py             # accuracy, F1, calibración, referencia TF-IDF
-├── datos/
-│   └── descripciones_intenciones.json
-├── resultados/                 # un .jsonl por condición y reporte.md
+│   ├── data.py                 # lectura de BANKING77 y armado de opciones
+│   ├── decider_client.py       # cliente de LiteLLM (pydantic + SDK de OpenAI)
+│   └── metrics.py              # accuracy, F1, calibración, referencia TF-IDF
+├── data/
+│   └── intent_descriptions.json
+├── results/                    # un .jsonl por condición y report.md
 └── docs/                       # guía de consumo de LiteLLM y colección de Postman
 ```
 
@@ -71,16 +71,16 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env          # y pon tu llave virtual de LiteLLM en .env
-python 1_descargar_datos.py
-python 2_ejecutar_experimento.py --prueba    # muestra una petición sin enviarla
-python 2_ejecutar_experimento.py             # 10 por intención, ambas condiciones
-python 2_ejecutar_experimento.py --condicion nombres --barajar
-python 3_analizar_resultados.py
+python 1_download_data.py
+python 2_run_experiment.py --prueba    # muestra una petición sin enviarla
+python 2_run_experiment.py             # 10 por intención, ambas condiciones
+python 2_run_experiment.py --condicion names --barajar
+python 3_analyze_results.py
 ```
 
 > **La llave nunca se sube a git.** El archivo `.env` está en `.gitignore`.
 
-Los resultados de esta corrida ya están en `resultados/`. Si relanzas el paso 2, continúa donde quedó y no repite consultas. Para empezar de cero, borra los `.jsonl`.
+Los resultados de esta corrida ya están en `results/`. Si relanzas el paso 2, continúa donde quedó y no repite consultas. Para empezar de cero, borra los `.jsonl`.
 
 ### Tiempo estimado
 

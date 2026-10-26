@@ -2,23 +2,23 @@
 
 Cada consulta se manda como una pregunta `choice` con las 77 intenciones como
 opciones. Las peticiones van una a una, porque el servidor no admite concurrencia.
-Los resultados se guardan en resultados/<condicion>.jsonl; si se corta, al
+Los resultados se guardan en results/<condicion>.jsonl; si se corta, al
 relanzar continúa donde quedó.
 
 Ejemplos:
-    python 2_ejecutar_experimento.py --prueba                  # muestra una petición, sin enviar
-    python 2_ejecutar_experimento.py                           # 10 por clase, ambas condiciones
-    python 2_ejecutar_experimento.py --condicion nombres --barajar
-    python 2_ejecutar_experimento.py --por-clase 0             # test completo (3 080)
+    python 2_run_experiment.py --prueba                  # muestra una petición, sin enviar
+    python 2_run_experiment.py                           # 10 por clase, ambas condiciones
+    python 2_run_experiment.py --condicion names --barajar
+    python 2_run_experiment.py --por-clase 0             # test completo (3 080)
 """
 import argparse
 import json
 import random
 import time
 
-from experimento.cliente_decider import Choice, DeciderClient, DeciderRequest
-from experimento.config import CARPETA_RESULTADOS, CONDICIONES, INSTRUCCION, TOKENS_ALERTA, load_credentials
-from experimento.datos import (build_options, read_split, list_intents,
+from experiment.decider_client import Choice, DeciderClient, DeciderRequest
+from experiment.config import CARPETA_RESULTADOS, CONDICIONES, INSTRUCCION, TOKENS_ALERTA, load_credentials
+from experiment.data import (build_options, read_split, list_intents,
                                stratified_sample, readable_name)
 
 
@@ -84,7 +84,7 @@ def to_record(fila, respuesta, latencia_total_ms: float, de_legible: dict) -> di
 
 
 def run_condition(cliente, condicion, consultas, intenciones, args) -> None:
-    nombre = condicion + ("_barajado" if args.barajar else "")
+    nombre = condicion + ("_shuffled" if args.barajar else "")
     archivo = CARPETA_RESULTADOS / f"{nombre}.jsonl"
     hechos = completed_ids(archivo)
     pendientes = consultas[~consultas.id.isin(hechos)]
@@ -129,7 +129,7 @@ def main() -> None:
 
     cliente = DeciderClient(*load_credentials())
     # Calentamiento: la primera petición tras un despliegue puede tardar decenas de segundos.
-    ask_decider(cliente, consultas.texto[0], build_options("nombres", intenciones))
+    ask_decider(cliente, consultas.texto[0], build_options("names", intenciones))
 
     CARPETA_RESULTADOS.mkdir(exist_ok=True)
     for condicion in args.condicion:

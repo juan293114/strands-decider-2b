@@ -1,6 +1,6 @@
 # La llave de LiteLLM va solo en .env
 .env
-# Los CSV de BANKING77 se descargan con 1_descargar_datos.py
-datos/*.csv
+# Los CSV de BANKING77 se descargan con 1_download_data.py
+data/*.csv
 __pycache__/
 .venv/
