@@ -25,15 +25,18 @@ def expected_calibration_error(confianza: np.ndarray, acierto: np.ndarray, inter
 def summarize(df: pd.DataFrame) -> dict:
     """Métricas principales de una condición (un DataFrame de resultados)."""
     acierto = (df.real == df.predicha).to_numpy(float)
-    return {
+    resultado = {
         "accuracy": acierto.mean(),
         "macro_f1": f1_score(df.real, df.predicha, average="macro"),
         "top3": (df.posicion_real <= 3).mean(),
         "top5": (df.posicion_real <= 5).mean(),
         "ECE": expected_calibration_error(df.p_predicha.to_numpy(), acierto),
-        "latencia_p50_ms": df.latencia_servidor_ms.median(),
-        "latencia_p95_ms": df.latencia_servidor_ms.quantile(0.95),
     }
+    # Solo el decider reporta latencia; BERT no tiene esta columna.
+    if "latencia_servidor_ms" in df:
+        resultado["latencia_p50_ms"] = df.latencia_servidor_ms.median()
+        resultado["latencia_p95_ms"] = df.latencia_servidor_ms.quantile(0.95)
+    return resultado
 
 
 def threshold_table(df: pd.DataFrame, umbrales=(0.0, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95)) -> pd.DataFrame:

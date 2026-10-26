@@ -4,3 +4,5 @@
 data/*.csv
 __pycache__/
 .venv/
+# Datos y modelos del ajuste fino
+work/

@@ -7,6 +7,7 @@
 """
 import json
 import os
+import urllib.request
 from typing import Annotated, Literal, Union
 
 from openai import OpenAI
@@ -93,6 +94,25 @@ class DeciderClient:
         )
         # y la respuesta del decider llega como JSON dentro de message.content
         return DeciderResponse.model_validate(json.loads(r.choices[0].message.content))
+
+
+class LocalDeciderClient:
+    """Habla directamente con un servidor `strands-decider serve`, sin LiteLLM.
+
+    Se usa en Colab para evaluar un modelo ajustado servido en la misma máquina.
+    Tiene el mismo método `decide` que DeciderClient, así que es intercambiable.
+    """
+
+    def __init__(self, base_url: str = "http://127.0.0.1:8000"):
+        self._url = base_url.rstrip("/") + "/v1/systemone"
+
+    def decide(self, req: DeciderRequest) -> DeciderResponse:
+        peticion = urllib.request.Request(
+            self._url, data=req.model_dump_json().encode(),
+            headers={"content-type": "application/json"},
+        )
+        with urllib.request.urlopen(peticion, timeout=120) as respuesta:
+            return DeciderResponse.model_validate(json.loads(respuesta.read()))
 
 
 if __name__ == "__main__":

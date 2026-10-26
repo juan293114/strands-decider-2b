@@ -10,13 +10,15 @@ Ejemplos:
     python 2_run_experiment.py                           # 10 por clase, ambas condiciones
     python 2_run_experiment.py --condicion names --barajar
     python 2_run_experiment.py --por-clase 0             # test completo (3 080)
+    python 2_run_experiment.py --por-clase 0 --condicion names \
+        --servidor-local http://127.0.0.1:8000             # decider ajustado, en Colab
 """
 import argparse
 import json
 import random
 import time
 
-from experiment.decider_client import Choice, DeciderClient, DeciderRequest
+from experiment.decider_client import Choice, DeciderClient, DeciderRequest, LocalDeciderClient
 from experiment.config import CARPETA_RESULTADOS, CONDICIONES, INSTRUCCION, TOKENS_ALERTA, load_credentials
 from experiment.data import (build_options, read_split, list_intents,
                                stratified_sample, readable_name)
@@ -33,6 +35,9 @@ def parse_arguments() -> argparse.Namespace:
     p.add_argument("--semilla", type=int, default=13)
     p.add_argument("--prueba", action="store_true",
                    help="muestra la primera petición y termina, sin llamar al servidor")
+    p.add_argument("--servidor-local", metavar="URL",
+                   help="usa un `strands-decider serve` local en vez de LiteLLM; "
+                        "los resultados van a results/decider_finetuned/")
     return p.parse_args()
 
 
@@ -83,9 +88,9 @@ def to_record(fila, respuesta, latencia_total_ms: float, de_legible: dict) -> di
     }
 
 
-def run_condition(cliente, condicion, consultas, intenciones, args) -> None:
+def run_condition(cliente, condicion, consultas, intenciones, args, carpeta) -> None:
     nombre = condicion + ("_shuffled" if args.barajar else "")
-    archivo = CARPETA_RESULTADOS / f"{nombre}.jsonl"
+    archivo = carpeta / f"{nombre}.jsonl"
     hechos = completed_ids(archivo)
     pendientes = consultas[~consultas.id.isin(hechos)]
     print(f"[{nombre}] {len(hechos)} hechas, {len(pendientes)} pendientes -> {archivo.name}")
@@ -127,13 +132,18 @@ def main() -> None:
         print(json.dumps(peticion.model_dump(), indent=1, ensure_ascii=False)[:1200], "...")
         return
 
-    cliente = DeciderClient(*load_credentials())
+    if args.servidor_local:
+        cliente = LocalDeciderClient(args.servidor_local)
+        carpeta = CARPETA_RESULTADOS / "decider_finetuned"
+    else:
+        cliente = DeciderClient(*load_credentials())
+        carpeta = CARPETA_RESULTADOS
     # Calentamiento: la primera petición tras un despliegue puede tardar decenas de segundos.
     ask_decider(cliente, consultas.texto[0], build_options("names", intenciones))
 
-    CARPETA_RESULTADOS.mkdir(exist_ok=True)
+    carpeta.mkdir(parents=True, exist_ok=True)
     for condicion in args.condicion:
-        run_condition(cliente, condicion, consultas, intenciones, args)
+        run_condition(cliente, condicion, consultas, intenciones, args, carpeta)
 
 
 if __name__ == "__main__":

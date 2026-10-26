@@ -6,6 +6,13 @@ import pandas as pd
 
 from experiment import metrics
 from experiment.config import CARPETA_RESULTADOS
+
+# Modelos opcionales que se comparan con el decider si existen sus resultados:
+# BERT (paso 4) y el decider ajustado (paso 5 y notebook de Colab).
+MODELOS_EXTRA = {
+    "bert": "BERT ajustado",
+    "decider_finetuned": "Decider ajustado",
+}
 from experiment.data import read_split
 
 
@@ -27,6 +34,15 @@ def main() -> None:
     referencia = metrics.supervised_baseline(read_split("train"),
                                                  test[test.id.isin(comunes)])
     filas = [{"condicion": "TF-IDF + SVM (supervisado)", **referencia}]
+    # Los modelos opcionales entran en la tabla si cubren las mismas consultas.
+    for carpeta, etiqueta in MODELOS_EXTRA.items():
+        for archivo in sorted((CARPETA_RESULTADOS / carpeta).glob("*.jsonl")):
+            extra = pd.read_json(archivo, lines=True)
+            extra = extra[extra.id.isin(comunes)]
+            if len(extra) == len(comunes):
+                filas.append({"condicion": f"{etiqueta}: {archivo.stem}", **metrics.summarize(extra)})
+            else:
+                print(f"aviso: {carpeta}/{archivo.name} no cubre las mismas consultas; se omite")
     filas += [{"condicion": f"Decider: {k}", **metrics.summarize(df)} for k, df in corridas.items()]
     resumen = pd.DataFrame(filas)
 

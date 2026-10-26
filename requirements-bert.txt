@@ -1,0 +1,4 @@
+# Dependencias extra para 4_train_bert.py
+-r requirements.txt
+torch>=2.3
+transformers>=4.44
