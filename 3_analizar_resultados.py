@@ -6,10 +6,10 @@ import pandas as pd
 
 from experimento import metricas
 from experimento.config import CARPETA_RESULTADOS
-from experimento.datos import leer_particion
+from experimento.datos import read_split
 
 
-def tabla(df: pd.DataFrame) -> str:
+def markdown_table(df: pd.DataFrame) -> str:
     return df.to_markdown(index=False, floatfmt=".3f")
 
 
@@ -23,11 +23,11 @@ def main() -> None:
     comunes = set.intersection(*(set(df.id) for df in corridas.values()))
     corridas = {k: df[df.id.isin(comunes)] for k, df in corridas.items()}
 
-    test = leer_particion("test")
-    referencia = metricas.referencia_supervisada(leer_particion("train"),
+    test = read_split("test")
+    referencia = metricas.supervised_baseline(read_split("train"),
                                                  test[test.id.isin(comunes)])
     filas = [{"condicion": "TF-IDF + SVM (supervisado)", **referencia}]
-    filas += [{"condicion": f"Decider: {k}", **metricas.resumen(df)} for k, df in corridas.items()]
+    filas += [{"condicion": f"Decider: {k}", **metricas.summarize(df)} for k, df in corridas.items()]
     resumen = pd.DataFrame(filas)
 
     modelos = sorted({m for df in corridas.values() for m in df.modelo.unique()})
@@ -35,21 +35,21 @@ def main() -> None:
         "# Resultados: BANKING77 con Strands Decider", "",
         f"Modelo servido: {', '.join(modelos)}. Ejemplos de prueba: {len(comunes)}.", "",
         "La latencia es la que reporta el servidor del decider, sin red ni LiteLLM.", "",
-        "## Resumen", "", tabla(resumen), "",
+        "## Resumen", "", markdown_table(resumen), "",
     ]
     for nombre, df in corridas.items():
         lineas += [
             f"## Condición: {nombre}", "",
             f"Tokens de entrada: mediana {df.tokens_entrada.median():.0f}, "
             f"máximo {df.tokens_entrada.max()}.", "",
-            "### Exactitud según umbral de probabilidad", "", tabla(metricas.tabla_umbrales(df)), "",
-            "### Diez intenciones con peor F1", "", tabla(metricas.peores_clases(df)), "",
-            "### Confusiones más frecuentes", "", tabla(metricas.confusiones(df)), "",
+            "### Exactitud según umbral de probabilidad", "", markdown_table(metricas.threshold_table(df)), "",
+            "### Diez intenciones con peor F1", "", markdown_table(metricas.worst_classes(df)), "",
+            "### Confusiones más frecuentes", "", markdown_table(metricas.top_confusions(df)), "",
         ]
 
     reporte = CARPETA_RESULTADOS / "reporte.md"
     reporte.write_text("\n".join(lineas))
-    print(tabla(resumen))
+    print(markdown_table(resumen))
     print(f"\nReporte completo en {reporte}")
 
 

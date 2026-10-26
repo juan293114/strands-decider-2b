@@ -7,7 +7,7 @@ from sklearn.pipeline import make_pipeline, make_union
 from sklearn.svm import LinearSVC
 
 
-def error_calibracion(confianza: np.ndarray, acierto: np.ndarray, intervalos: int = 15) -> float:
+def expected_calibration_error(confianza: np.ndarray, acierto: np.ndarray, intervalos: int = 15) -> float:
     """ECE: diferencia media entre la probabilidad que da el modelo y su acierto real.
 
     0 significa calibración perfecta: cuando dice 80 %, acierta el 80 % de las veces.
@@ -22,7 +22,7 @@ def error_calibracion(confianza: np.ndarray, acierto: np.ndarray, intervalos: in
     return float(total)
 
 
-def resumen(df: pd.DataFrame) -> dict:
+def summarize(df: pd.DataFrame) -> dict:
     """Métricas principales de una condición (un DataFrame de resultados)."""
     acierto = (df.real == df.predicha).to_numpy(float)
     return {
@@ -30,13 +30,13 @@ def resumen(df: pd.DataFrame) -> dict:
         "macro_f1": f1_score(df.real, df.predicha, average="macro"),
         "top3": (df.posicion_real <= 3).mean(),
         "top5": (df.posicion_real <= 5).mean(),
-        "ECE": error_calibracion(df.p_predicha.to_numpy(), acierto),
+        "ECE": expected_calibration_error(df.p_predicha.to_numpy(), acierto),
         "latencia_p50_ms": df.latencia_servidor_ms.median(),
         "latencia_p95_ms": df.latencia_servidor_ms.quantile(0.95),
     }
 
 
-def tabla_umbrales(df: pd.DataFrame, umbrales=(0.0, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95)) -> pd.DataFrame:
+def threshold_table(df: pd.DataFrame, umbrales=(0.0, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95)) -> pd.DataFrame:
     """Si solo aceptamos predicciones con probabilidad >= umbral:
     qué fracción se acepta (cobertura) y qué tan exactas son."""
     filas = []
@@ -47,7 +47,7 @@ def tabla_umbrales(df: pd.DataFrame, umbrales=(0.0, 0.3, 0.5, 0.7, 0.8, 0.9, 0.9
     return pd.DataFrame(filas)
 
 
-def peores_clases(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
+def worst_classes(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
     reporte = pd.DataFrame(classification_report(
         df.real, df.predicha, output_dict=True, zero_division=0)).T
     reporte = reporte.drop(index=["accuracy", "macro avg", "weighted avg"])
@@ -55,13 +55,13 @@ def peores_clases(df: pd.DataFrame, n: int = 10) -> pd.DataFrame:
     return reporte.reset_index(names="intencion")[["intencion", "precision", "recall", "f1-score"]]
 
 
-def confusiones(df: pd.DataFrame, n: int = 12) -> pd.DataFrame:
+def top_confusions(df: pd.DataFrame, n: int = 12) -> pd.DataFrame:
     errores = df[df.real != df.predicha]
     return (errores.groupby(["real", "predicha"]).size()
             .sort_values(ascending=False).head(n).reset_index(name="veces"))
 
 
-def referencia_supervisada(train: pd.DataFrame, test: pd.DataFrame) -> dict:
+def supervised_baseline(train: pd.DataFrame, test: pd.DataFrame) -> dict:
     """TF-IDF de palabras y caracteres + SVM lineal, entrenado con los 10 003 ejemplos."""
     modelo = make_pipeline(
         make_union(

@@ -29,7 +29,7 @@ CONDICIONES = ("nombres", "descripciones")
 TOKENS_ALERTA = 2800
 
 
-def cargar_env() -> tuple[str, str]:
+def load_credentials() -> tuple[str, str]:
     """Lee LITELLM_BASE_URL y LITELLM_API_KEY desde el entorno o desde .env."""
     if ARCHIVO_ENV.exists():
         for linea in ARCHIVO_ENV.read_text().splitlines():
