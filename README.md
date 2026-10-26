@@ -8,15 +8,16 @@ Medidos el 2026-10-26 con `strands-decider-2B-hobson-v21` sobre el **test comple
 
 | Método | Datos de entrenamiento | Accuracy | Macro-F1 | Top-3 | Calibración (ECE) | Latencia mediana |
 |---|---|---|---|---|---|---|
-| BERT ajustado, artículo original¹ | 10 003 ejemplos | 0,937 | | | | |
-| USE + ConveRT, artículo original¹ | 10 003 ejemplos | 0,934 | | | | |
+| BERT ajustado, artículo original¹ | entrenamiento completo | 0,937 | | | | |
+| USE + ConveRT, artículo original¹ | entrenamiento completo | 0,934 | | | | |
 | TF-IDF + SVM, referencia propia² | 10 003 ejemplos | 0,913 | 0,913 | | | |
 | **Decider, solo nombres de intención** | **ninguno** | **0,844** | **0,842** | **0,969** | **0,022** | **83 ms** |
 | Decider, nombres en orden barajado | ninguno | 0,844 | 0,844 | 0,969 | 0,019 | 84 ms |
 | Decider, nombres con descripción | ninguno | 0,811 | 0,810 | 0,955 | 0,209 | 213 ms |
 
-¹ Casanueva et al., 2020. Cifras tomadas de la tabla del artículo reproducida en un artículo de NAACL 2021; conviene confirmarlas en el PDF original.
-² Calculada con el código de este repositorio, en `experiment/metrics.py`.
+¹ **Cifras obtenidas de internet, no calculadas en este repositorio.** Provienen del artículo original de BANKING77: Casanueva, Temčinas, Gerz, Henderson y Vulić, 2020, [*Efficient Intent Detection with Dual Sentence Encoders*](https://aclanthology.org/2020.nlp4convai-1.5.pdf), publicado en el 2nd Workshop on NLP for Conversational AI. El artículo reporta 93,66 % para BERT ajustado y 93,36 % para USE + ConveRT, aquí redondeados a tres decimales. No se tomaron del PDF original, sino de una búsqueda web que citaba la reproducción de esa tabla en un [artículo de NAACL 2021](https://aclanthology.org/2021.naacl-main.237.pdf). Conviene confirmarlas en la tabla de resultados del artículo original. Según esa misma fuente, el artículo original entrenó con algo más de datos que los 10 003 ejemplos, porque no reservó una parte para validación.
+
+² Calculada con el código de este repositorio, en la función `supervised_baseline` de `experiment/metrics.py`. Se entrena con los 10 003 ejemplos de `train.csv` y se evalúa con las mismas 3 080 consultas que el decider.
 
 La latencia es la que reporta el servidor del decider. Con la red y LiteLLM, cada consulta tarda unos 143 ms con nombres y unos 272 ms con descripciones.
 
